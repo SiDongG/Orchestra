@@ -1,9 +1,6 @@
 #include <Servo.h>
 int led=2;
 int sensor=8;
-int motor1=10;
-int motor2=9;
-int enable=11;
 int speaker=3;
 
 int octive=4;
@@ -37,7 +34,6 @@ int oct_down = A4;
 int downstate;
 int select = A5;
 int selectState;
-int reset = A0;
 
 int angle=0;
 bool value=0;
@@ -46,9 +42,6 @@ Servo servo;
 void setup() {
   pinMode(led,OUTPUT);
   pinMode(sensor,INPUT);
-  pinMode(motor1,OUTPUT);
-  pinMode(motor2,OUTPUT);
-  pinMode(enable,OUTPUT);
   pinMode(speaker,OUTPUT);
   pinMode(select,INPUT);
   pinMode(oct_up,INPUT);
@@ -56,9 +49,9 @@ void setup() {
   pinMode(conductorMode, INPUT);
   pinMode(playerMode, INPUT);
   pinMode(AA, OUTPUT); //LSB
-  pinMode(B, OUTPUT);
-  pinMode(C, OUTPUT);
-  pinMode(D, OUTPUT); //MSB
+  pinMode(BB, OUTPUT);
+  pinMode(CC, OUTPUT);
+  pinMode(DD, OUTPUT); //MSB
   servo.attach(A1);
   servo.write(angle);
   Serial.begin(9600);
@@ -67,8 +60,10 @@ void setup() {
 void conductorsetup() {
   digitalWrite(led,HIGH);
   selectState=digitalRead(select);
-  if (selectState==HIGH) {
-  play();
+  Serial.println(1);
+  if (selectState==LOW) {
+    Serial.println(56);
+    play();
   }
 }
 
@@ -79,9 +74,9 @@ void playersetup() {
 
 void loop() {
   int  a = octive%2;
-  int b = octive/2%2;
-  int c = octive/4%2;
-  int d = octive/8%2;
+  int b = (octive/2)%2;
+  int c = (octive/4)%2;
+  int d = (octive/8)%2;
   (a==0) ? digitalWrite(AA, LOW): digitalWrite(AA, HIGH);
   (b==0) ? digitalWrite(BB, LOW): digitalWrite(BB, HIGH);
   (c==0) ? digitalWrite(CC, LOW): digitalWrite(CC, HIGH);
@@ -90,9 +85,11 @@ void loop() {
   downstate=digitalRead(oct_down);
   if (upstate==LOW) {
     octive++;
+    delay(500);
   }
   if (downstate==LOW) {
     octive--;
+    delay(500);
   }
   playerState=digitalRead(playerMode);
   conductorState=digitalRead(conductorMode);
@@ -107,23 +104,15 @@ void loop() {
 
 void play() {
   tone(speaker,A,durations[2]*100);
-  digitalWrite(enable,200);
-  digitalWrite(10,HIGH);
-  digitalWrite(9,LOW);
   for (int i=0; notes[i]!=-1;i++){
     //move the motor in here somewhere as well
     //for testing 
-    
-    if (reset ==1) {
-      return;
-    }
     int duration=s*durations[i];
     tone(speaker,notes[i],duration*0.95);
+    Serial.println(2);
     delay(duration);
     if (i==52){
         break;
       }
-    noTone(speaker);
-    digitalWrite(enable,0);
   }
   }
