@@ -1,4 +1,6 @@
-
+#include <Servo.h>
+Servo servo1;
+Servo servo2;
 int sensor=8;
 int led=2;
 int speaker=3;
@@ -36,6 +38,8 @@ int downstate;
 int select = A5;
 int selectState;
 
+int angle=0;
+
 void setup() {
   pinMode(led,OUTPUT);
   pinMode(sensor,INPUT);
@@ -49,6 +53,10 @@ void setup() {
   pinMode(BB, OUTPUT);
   pinMode(CC, OUTPUT);
   pinMode(DD, OUTPUT); //MSB
+  servo1.attach(9);
+  servo1.write(angle);
+  servo2.attach(10);
+  servo2.write(40-angle);
   Serial.begin(9600);
 }
 
@@ -124,14 +132,26 @@ if(playerState == 1) {
 
 
   if (state==4){
+    servo1.write(0);
+    servo2.write(40);
     for (int i=3; notes[i]!=-1;i++){
         if (digitalRead(conductorMode)) {
           break;
         }
+        if ((i-3)/10%2) {
+         angle=angle-4;
+        }
+        if((i-3)/10%2==0){
+         angle=angle+4;
+        }
+        servo1.write(0+angle);
+        servo2.write(40-angle);
         int duration=durations[i];
         tone(speaker,notes[i]*(2^octive),duration*tempo/2.8);
         delay(duration*0.95*tempo/2.8);
         if (i==49){
+          servo1.write(0);
+          servo2.write(40);
           break;
         }
   }
@@ -144,14 +164,24 @@ else{
 }
 
 void play() {
+  servo1.write(0);
+  servo2.write(40);
 //  tone(speaker,A,durations[2]*100);
   for (int i=0; notes[i]!=-1;i++){
-    //move the motor in here somewhere as well
-    //for testing 
+    if (i/10%2) {
+      angle=angle-4;
+    }
+    if(i/10%2==0){
+      angle=angle+4;
+    }
+    servo1.write(0+angle);
+    servo2.write(40-angle);
     int duration=100*durations[i];
     tone(speaker,notes[i]*(2^octive),duration*0.95);
     delay(duration);
     if (i==49){
+        servo1.write(0);
+        servo2.write(40);
         break;
      }
   }
