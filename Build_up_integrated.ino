@@ -38,7 +38,7 @@ int downstate;
 int select = A5;
 int selectState;
 
-int angle=0;
+int angle=5;
 
 void setup() {
   pinMode(led,OUTPUT);
@@ -56,7 +56,7 @@ void setup() {
   servo1.attach(9);
   servo1.write(angle);
   servo2.attach(10);
-  servo2.write(40-angle);
+  servo2.write(50-angle);
   Serial.begin(9600);
 }
 
@@ -69,6 +69,10 @@ void conductorsetup() {
 }
 
 void loop() {
+  if (octive==-1){
+    octive=9;
+  }
+  octive=octive%10;
   int  a = octive%2;
   int b = (octive/2)%2;
   int c = (octive/4)%2;
@@ -92,6 +96,8 @@ void loop() {
   conductorState=digitalRead(conductorMode);
   
 if(playerState == 1) {
+  servo1.detach();
+  servo2.detach();
   digitalWrite(led, LOW);
   value=digitalRead(sensor);
   if (value==HIGH && state==0){
@@ -106,12 +112,12 @@ if(playerState == 1) {
       Start2=millis();
       Serial.println(Start2);
       state=2;
-      Serial.println(tempo);
     }
     cursor1=cursor2;
     
   }
   if (value==HIGH && state==2){
+    Serial.println(2);
     cursor3=millis();
     if (abs(cursor3-cursor2)>50){
       Start3=millis();
@@ -132,26 +138,34 @@ if(playerState == 1) {
 
 
   if (state==4){
-    servo1.write(0);
-    servo2.write(40);
-    for (int i=3; notes[i]!=-1;i++){
+    servo1.attach(9);
+    servo1.write(angle);
+    servo2.attach(10);
+    servo2.write(50-angle);
+    for (int i=2; notes[i]!=-1;i++){
         if (digitalRead(conductorMode)) {
+          angle=5;
+          servo1.write(angle);
+          servo2.write(50-angle);
+          state=0;
           break;
         }
-        if ((i-3)/10%2) {
+        if ((i-2)/10%2) {
          angle=angle-4;
         }
-        if((i-3)/10%2==0){
+        if((i-2)/10%2==0){
          angle=angle+4;
         }
-        servo1.write(0+angle);
-        servo2.write(40-angle);
+        servo1.write(angle);
+        servo2.write(50-angle);
         int duration=durations[i];
         tone(speaker,notes[i]*(2^octive),duration*tempo/2.8);
         delay(duration*0.95*tempo/2.8);
         if (i==49){
-          servo1.write(0);
-          servo2.write(40);
+          angle=5;
+          servo1.write(angle);
+          servo2.write(50-angle);
+          state=0;
           break;
         }
   }
@@ -164,8 +178,10 @@ else{
 }
 
 void play() {
-  servo1.write(0);
-  servo2.write(40);
+  servo1.attach(9);
+  servo2.attach(10);
+  servo1.write(5);
+  servo2.write(45);
 //  tone(speaker,A,durations[2]*100);
   for (int i=0; notes[i]!=-1;i++){
     if (i/10%2) {
@@ -175,13 +191,14 @@ void play() {
       angle=angle+4;
     }
     servo1.write(0+angle);
-    servo2.write(40-angle);
+    servo2.write(50-angle);
     int duration=100*durations[i];
     tone(speaker,notes[i]*(2^octive),duration*0.95);
     delay(duration);
     if (i==49){
-        servo1.write(0);
-        servo2.write(40);
+        angle=5;
+        servo1.write(5);
+        servo2.write(50-angle);
         break;
      }
   }
